@@ -134,11 +134,11 @@ client_error(Status, StatusLine, Body) ->
             {error, {http_error, Status, StatusLine, Body}};
         true ->
             Json = jsx:decode(Body),
-            case proplists:get_value(<<"__type">>, Json) of
+            case maps:get(<<"__type">>, Json, undefined) of
                 undefined ->
                     {error, {http_error, Status, StatusLine, Body}};
                 FullType ->
-                    Message = proplists:get_value(<<"message">>, Json, <<>>),
+                    Message = maps:get(<<"message">>, Json, <<>>),
                     case binary:split(FullType, <<"#">>) of
                         [_, <<"ProvisionedThroughputExceededException">> = Type] ->
                             {retry, {Type, Message}};
@@ -172,4 +172,3 @@ port_spec(#aws_config{kinesis_port=80}) ->
     "";
 port_spec(#aws_config{kinesis_port=Port}) ->
     [":", erlang:integer_to_list(Port)].
-
