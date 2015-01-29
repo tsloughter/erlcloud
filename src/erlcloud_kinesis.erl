@@ -341,17 +341,13 @@ get_normalized_records(Config, Json) when is_record(Config, aws_config) ->
   end.
 
 
-normalize_record([{K,V} | T]) when K == <<"Data">> -> [ {K, base64:decode(V)} | normalize_record(T) ];
-normalize_record([K | T]) -> [K | normalize_record(T) ];
-normalize_record([]) -> [].
+normalize_record(#{<<"Data">> := V}=M) -> M#{<<"Data">> => base64:decode(V)}.
 
 normalize_records([K | V]) -> [ normalize_record(K) | normalize_records(V) ];
 normalize_records([]) -> [].
 
-normalize_response([{K,V} | T]) when K == <<"Records">> -> [ {K, normalize_records(V)} | normalize_response(T)];
-normalize_response([K | T]) -> [K | normalize_response(T)];
-normalize_response([]) -> [].
-
+normalize_response(#{<<"Records">> := V}=M) ->
+    M#{<<"Records">> => normalize_records(V)}.
 
 %%------------------------------------------------------------------------------
 %% @doc
